@@ -11,9 +11,12 @@ namespace Inventory
 		[field: SerializeField] public float HelthRestore { get; set; }
 		[field: SerializeField] public float Price { get; set; }
 
+		public event Action<float> OnGetMoney;
+
 		public float Sell()
 		{
 			Debug.Log("You win " + Price);
+			OnGetMoney?.Invoke(Price);
 			return Price;
 		}
 

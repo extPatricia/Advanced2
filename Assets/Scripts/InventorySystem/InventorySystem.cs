@@ -11,124 +11,81 @@ namespace Inventory
 	public class InventorySystem : MonoBehaviour
 	{
 		#region Properties
+		public List<Item> Items => _items;
+		public Item SelectedItem { get; private set; }
 		#endregion
 
 		#region Fields
-		//TODO: Refacotr: move this to UIController
-		[Header("UI References")]
-		[SerializeField] private ItemButton _prefabItemButton;
-		[SerializeField] private Transform _inventoryPanel;
-		[SerializeField] private Button _useButton;
-		[SerializeField] private Button _sellButton;
-
 		[Header("Object Definition")]
 		[SerializeField] private Weapon[] _weapons;
 		[SerializeField] private Food[] _food;
 		[SerializeField] private Other[] _other;
+
 		[Header("Item Pool")]
 		[SerializeField] private List<Item> _items = new List<Item>();
-		[Header("Item Selected")]
-		[SerializeField] private ItemButton _selectedItem;
 
 		#endregion
 
 		#region Unity Callbacks
 		// Start is called before the first frame update
-		void Start()
-		{
-			
+		void Awake()
+		{			
 			InitializeItems();
-			InitializeUI();
-
-			//TODO: Refacotr: move this to UIController
-			_useButton.onClick.AddListener(UseCurrentItem);
-			_sellButton.onClick.AddListener(SellCurrentItem);
-
-		}
-
-		// Update is called once per frame
-		void Update()
-		{
-
 		}
 		#endregion
 
 		#region Public Methods
-		public void AddItem(ItemButton itemButton)
+		public void AddItem(Item item)
 		{
-			ItemButton newItem = Instantiate(itemButton, _inventoryPanel);
-			newItem.CurrentItem = itemButton.CurrentItem;
-			newItem.OnClick += () => SelectItem(newItem);
+			_items.Add(item);
+			InventoryEventSystem.Instance.ItemAdded(item);
 		}
 
-		public void SelectItem(ItemButton currentItem)
+		public void SelectItem(Item currentItem)
 		{
-			_selectedItem = currentItem;
-			//Lógica de control de botones de acciones
-			if(_selectedItem.CurrentItem is IUsable)
-				_useButton.gameObject.SetActive(true);
-			else
-				_useButton.gameObject.SetActive(false);
+			SelectedItem = currentItem;
+			InventoryEventSystem.Instance.ItemSelected(SelectedItem);
+		}
 
-			if(_selectedItem.CurrentItem is ISellable)
-				_sellButton.gameObject.SetActive(true);
-			else
-				_sellButton.gameObject.SetActive(false);
+		public void SellCurrentItem()
+		{
+			if (SelectedItem is ISellable sellableItem)
+			{
+				float money = sellableItem.Sell();
+				
+				InventoryEventSystem.Instance.MoneyGained(money);
+				InventoryEventSystem.Instance.ItemSold(SelectedItem);
+
+				ConsumeItem(SelectedItem);
+			}
+		}
+
+		public void UseCurrentItem()
+		{
+			if (SelectedItem is IUsable usable)
+			{
+				usable.Use();
+				InventoryEventSystem.Instance.ItemUsed(SelectedItem);
+
+				if (SelectedItem is IConsumable)
+					ConsumeItem(SelectedItem);
+			}
+		}
+
+		public void ConsumeItem(Item item)
+		{
+			InventoryEventSystem.Instance.ItemConsumed(item);
+			SelectedItem = null;
 		}
 		#endregion
 
 		#region Private Methods
 		private void InitializeItems()
 		{
-			// Weapons
-			for (int i = 0; i < _weapons.Length; i++)
-				_items.Add(_weapons[i]);
-
-			// Food
-			for (int i = 0; i < _food.Length; i++)
-				_items.Add(_food[i]);
-
-			// Other
-			for (int i = 0; i < _other.Length; i++)
-				_items.Add(_other[i]);
-		}
-
-		private void InitializeUI()
-		{
-			for (int i = 0; i < _items.Count; i++)
-			{
-				ItemButton itemButton = Instantiate(_prefabItemButton, _prefabItemButton.transform.parent);
-				itemButton.CurrentItem = _items[i];
-				itemButton.OnClick += () => AddItem(itemButton);
-			}
-			_prefabItemButton.gameObject.SetActive(false);
-		}
-
-
-		//TODO: Refacotr: move this to UIController
-		private void SellCurrentItem()
-		{
-			(_selectedItem.CurrentItem as ISellable).Sell();
-			Consume(_selectedItem);
-		}
-
-		private void UseCurrentItem()
-		{
-			(_selectedItem.CurrentItem as IUsable).Use();
-			if (_selectedItem.CurrentItem is IConsumable)
-			{
-				Consume(_selectedItem);
-			}
-		}
-
-		private void Consume(ItemButton itemButton)
-		{
-			Destroy(_selectedItem.gameObject);
-			_selectedItem = null;
-			_sellButton.gameObject.SetActive(false);
-			_useButton.gameObject.SetActive(false);
-
-		}
+			_items.AddRange(_weapons);
+			_items.AddRange(_food);
+			_items.AddRange(_other);
+		}		
 		#endregion
 
 	}

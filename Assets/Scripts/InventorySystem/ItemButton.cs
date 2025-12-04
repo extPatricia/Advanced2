@@ -11,8 +11,11 @@ namespace Inventory
 		#region Properties
 		public Item CurrentItem  { 
 			get { return _currentItem; }
-			set { _currentItem = value;
-				_buttonText.text = _currentItem.Name;
+			set 
+			{ 
+				_currentItem = value;
+				//_buttonText.text = _currentItem.Name;
+				_button.image.sprite = _currentItem.Icon;
 			}
 		}
 		public event Action OnClick;
