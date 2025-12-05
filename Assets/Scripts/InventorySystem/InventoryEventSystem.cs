@@ -6,8 +6,6 @@ using UnityEngine;
 public class InventoryEventSystem : Singleton<InventoryEventSystem>
 {
 	#region Properties
-//	public static InventoryEventSystem Instance;
-
 	public event Action<float> OnMoneyGained;
 	public event Action<Item> OnItemAdded;
 	public event Action<Item> OnItemSold;
