@@ -1,11 +1,12 @@
-using UnityEngine;
-using System;
 using Inventory;
+using System;
+using Unity.VisualScripting;
+using UnityEngine;
 
-public class InventoryEventSystem : MonoBehaviour
+public class InventoryEventSystem : Singleton<InventoryEventSystem>
 {
 	#region Properties
-	public static InventoryEventSystem Instance;
+//	public static InventoryEventSystem Instance;
 
 	public event Action<float> OnMoneyGained;
 	public event Action<Item> OnItemAdded;
@@ -17,21 +18,6 @@ public class InventoryEventSystem : MonoBehaviour
 	#endregion
 
 	#region Fields
-	#endregion
-
-	#region Unity Callbacks
-	private void Awake()
-	{
-		if (Instance != null && Instance != this)
-		{
-			Destroy(this.gameObject);
-			return;
-		}
-		else
-		{
-			Instance = this;
-		}
-	}
 	#endregion
 
 	#region Public Methods

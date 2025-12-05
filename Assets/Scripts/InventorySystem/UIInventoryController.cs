@@ -27,7 +27,7 @@ public class UIInventoryController : MonoBehaviour
 	#region Unity 
 	private void Awake()
 	{
-		_inventorySystem = FindObjectOfType<InventorySystem>();
+		_inventorySystem = InventorySystem.Instance;
 	}
 	// Start is called before the first frame update
 	void Start()
@@ -60,20 +60,30 @@ public class UIInventoryController : MonoBehaviour
 
 	private void CreateItemButtonInPool(Item item)
 	{
-		var itemButton = Instantiate(_prefabItemButton, _itemPoolPanel);
+		ItemButton itemButton = Instantiate(_prefabItemButton, _itemPoolPanel);
 		itemButton.gameObject.SetActive(true);
 		itemButton.CurrentItem = item;
-		itemButton.OnClick += () => AddToInventory(itemButton);	
+		itemButton.OnClick += OnItemPoolClick;//() => AddToInventory(itemButton);	
+	}
+
+	private void OnItemPoolClick(ItemButton itemButton)
+	{
+		AddToInventory(itemButton);
 	}
 
 	private void AddToInventory(ItemButton itemButton)
 	{
-		var inventaryButton = Instantiate(_prefabItemButton, _inventoryPanel);
+		ItemButton inventaryButton = Instantiate(_prefabItemButton, _inventoryPanel);
 		inventaryButton.gameObject.SetActive(true);
 		inventaryButton.CurrentItem = itemButton.CurrentItem;
-		inventaryButton.OnClick += () => _inventorySystem.SelectItem(inventaryButton.CurrentItem);
+		inventaryButton.OnClick += OnInventorySelectItem; //() => _inventorySystem.SelectItem(inventaryButton.CurrentItem);
 
 		Destroy(itemButton.gameObject);
+	}
+
+	private void OnInventorySelectItem(ItemButton button)
+	{
+		_inventorySystem.SelectItem(button.CurrentItem);
 	}
 
 	private void OnItemSelected(Item item)
@@ -118,6 +128,18 @@ public class UIInventoryController : MonoBehaviour
 		_sellButton.gameObject.SetActive(false);
 		_useButton.gameObject.SetActive(false);
 
+	}
+
+	private void OnDisable()
+	{
+		if (InventoryEventSystem.Instance == null)
+			return;
+
+		InventoryEventSystem.Instance.OnItemConsumed -= OnItemConsumed;
+		InventoryEventSystem.Instance.OnItemSold -= OnItemSold;
+		InventoryEventSystem.Instance.OnItemUse -= OnItemUsed;
+		InventoryEventSystem.Instance.OnItemAdded -= OnItemAdded;
+		InventoryEventSystem.Instance.OnItemSelected -= OnItemSelected;
 	}
 	#endregion
 

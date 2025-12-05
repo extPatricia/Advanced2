@@ -37,7 +37,8 @@ public class UIMoneyController : MonoBehaviour
 
 	private void OnDisable()
 	{
-		InventoryEventSystem.Instance.OnMoneyGained -= UpdateMoney;
+		if (InventoryEventSystem.Instance != null)
+			InventoryEventSystem.Instance.OnMoneyGained -= UpdateMoney;
 	}
 
 	private void UpdateMoney(float money)

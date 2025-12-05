@@ -8,7 +8,7 @@ namespace Inventory
 {
 
 
-	public class InventorySystem : MonoBehaviour
+	public class InventorySystem : Singleton<InventorySystem>
 	{
 		#region Properties
 		public List<Item> Items => _items;
@@ -85,7 +85,7 @@ namespace Inventory
 			_items.AddRange(_weapons);
 			_items.AddRange(_food);
 			_items.AddRange(_other);
-		}		
+		}
 		#endregion
 
 	}

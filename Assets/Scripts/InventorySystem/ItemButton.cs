@@ -18,7 +18,7 @@ namespace Inventory
 				_button.image.sprite = _currentItem.Icon;
 			}
 		}
-		public event Action OnClick;
+		public event Action<ItemButton> OnClick;
 		#endregion
 
 		#region Fields
@@ -34,7 +34,7 @@ namespace Inventory
 			_button = GetComponent<Button>();
 			_buttonText = GetComponentInChildren<TextMeshProUGUI>();
 			// Delegate example
-			_button.onClick.AddListener(() => OnClick?.Invoke());
+			_button.onClick.AddListener(() => OnClick?.Invoke(this));
 		}
 
 		// Update is called once per frame
